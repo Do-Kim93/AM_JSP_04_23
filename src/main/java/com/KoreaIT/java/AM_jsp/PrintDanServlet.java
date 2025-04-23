@@ -30,7 +30,7 @@ public class PrintDanServlet extends HttpServlet {
 		response.getWriter().append(String.format("==%d단==<br>",d));
 //html 태그를 이용할수있다는 점을 이용해서 인라인 css문법으로 컬러를 줄수있다.
 		for (int i = 1; i <= maxx; i++) {
-			response.getWriter().append(String.format("<div style='color:%s'>%d * %d = %d</div>", co, d, maxx, d * maxx));
+			response.getWriter().append(String.format("<div style='color:%s'>%d * %d = %d</div>", co, d, i, d * i));
 		}
 
 	}
