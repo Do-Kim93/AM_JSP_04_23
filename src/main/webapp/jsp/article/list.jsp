@@ -11,24 +11,59 @@ List<Map<String, Object>> articleRows = (List<Map<String, Object>>) request.getA
 <head>
 <meta charset="UTF-8">
 <title>게시글 목록</title>
+<style>
+table>thead>tr>th, table>tbody>tr>td {
+	padding: 5px;
+}
+</style>
 </head>
 <body>
 	<h2>게시글 목록</h2>
 
 	<a href="../home/main">메인으로 이동</a>
 
+	<table style="border-collapse: collapse; border-color: green;"
+		border="1px">
+		<thead>
+			<tr>
+				<th>번호</th>
+				<th>날짜</th>
+				<th>제목</th>
+				<th>내용</th>
+				<th>삭제</th>
+			</tr>
+		</thead>
+		<tbody>
+			<%
+			for (Map<String, Object> articleRow : articleRows) {
+			%>
+			<tr style="text-align: center;">
+				<td><%=articleRow.get("id")%>번</td>
+				<td><%=articleRow.get("regDate")%></td>
+				<td><%=articleRow.get("title")%></td>
+				<td><%=articleRow.get("body")%></td>
+				<td><a
+					onclick="if ( confirm('정말 삭제하시겠습니까?') == false ) { return false; }"
+					href="doDelete?id=<%=articleRow.get("id")%>">del</a></td>
+			</tr>
+			<%
+			}
+			%>
+		</tbody>
+	</table>
+
+	<!-- 
 	<ul>
-		<%
+<%-- 		<%
 		for (Map<String, Object> articleRow : articleRows) {
 		%>
 		<li><%=articleRow.get("id")%>번,<%=articleRow.get("regDate")%>, <a
 			href="detail?id=<%=articleRow.get("id")%>"><%=articleRow.get("title")%></a>,<%=articleRow.get("body")%></li>
-		<%
-		}
+}
 		%>
-
+--%>
 	</ul>
-
+ -->
 
 </body>
 </html>

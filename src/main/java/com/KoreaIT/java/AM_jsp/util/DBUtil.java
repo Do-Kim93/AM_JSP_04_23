@@ -12,7 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class DBUtil {
 
-	public static Map<String, Object> selectRow(Connection dbConn, String sql) {
+	public static Map<String, Object> selectRow(Connection dbConn, SecSql sql) {
         List<Map<String, Object>> rows = selectRows(dbConn, sql);
 
         if (rows.size() == 0) {
@@ -22,15 +22,16 @@ public class DBUtil {
         return rows.get(0);
     }
 
-    public static List<Map<String, Object>> selectRows(Connection dbConn, String sql) throws SQLErrorException {
+    public static List<Map<String, Object>> selectRows(Connection dbConn, SecSql sql) throws SQLErrorException {
         List<Map<String, Object>> rows = new ArrayList<>();
 
+        PreparedStatement pstmt = null;
         Statement stmt = null;
         ResultSet rs = null;
 
         try {
-            stmt = dbConn.createStatement();
-            rs = stmt.executeQuery(sql);
+        	pstmt = sql.getPreparedStatement(dbConn);
+            rs = pstmt.executeQuery();
             ResultSetMetaData metaData = rs.getMetaData();
             int columnSize = metaData.getColumnCount();
 
@@ -78,7 +79,7 @@ public class DBUtil {
         return rows;
     }
 
-    public static int selectRowIntValue(Connection dbConn, String sql) {
+    public static int selectRowIntValue(Connection dbConn, SecSql sql) {
         Map<String, Object> row = selectRow(dbConn, sql);
 
         for (String key : row.keySet()) {
@@ -88,7 +89,7 @@ public class DBUtil {
         return -1;
     }
 
-    public static String selectRowStringValue(Connection dbConn, String sql) {
+    public static String selectRowStringValue(Connection dbConn, SecSql sql) {
         Map<String, Object> row = selectRow(dbConn, sql);
 
         for (String key : row.keySet()) {
@@ -98,7 +99,7 @@ public class DBUtil {
         return "";
     }
 
-    public static boolean selectRowBooleanValue(Connection dbConn, String sql) {
+    public static boolean selectRowBooleanValue(Connection dbConn, SecSql sql) {
         Map<String, Object> row = selectRow(dbConn, sql);
 
         for (String key : row.keySet()) {
