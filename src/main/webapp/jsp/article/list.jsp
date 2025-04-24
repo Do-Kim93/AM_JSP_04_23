@@ -14,8 +14,10 @@
 </head>
 <body>
 <h1>게시글 목록</h1>
-<<ul>
-<li><%=articleRows.get(0).get("id") %>번,</li>
+<ul style="color: red; list-style: none; margin: 0; padding: 0;">
+<%for(int i =0; i <= articleRows.size()-1; i++) {%>
+<li>id-<%=articleRows.get(i).get("id") %>번, 작성날짜-<%=articleRows.get(i).get("regDate")%>, 제목-<%=articleRows.get(i).get("title")%>, 내용-<%=articleRows.get(i).get("body")%></li>
+<%}%>
 </ul>
 </body>
 </html>
