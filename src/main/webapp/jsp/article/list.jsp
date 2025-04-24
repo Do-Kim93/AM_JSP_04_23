@@ -13,29 +13,22 @@ List<Map<String, Object>> articleRows = (List<Map<String, Object>>) request.getA
 <title>게시글 목록</title>
 </head>
 <body>
-	<h1>게시글 목록</h1>
-	<ul style="color: red; list-style: none; margin: 0; padding: 0;">
-		<%
-		for (int i = 0; i <= articleRows.size() - 1; i++) {
-		%>
+	<h2>게시글 목록</h2>
 
-		<li>id-<%=articleRows.get(i).get("id")%>번, 작성날짜-<%=articleRows.get(i).get("regDate")%>,<a
-			href="detail?id=<%=articleRows.get(i).get("id")%>"><%=articleRows.get(i).get("title")%></a>,
-			내용-<%=articleRows.get(i).get("body")%></li>
-		<%
-		}
-		%>
-	</ul>
-	<h1>게시글 목록2</h1>
-	<ul style="color: green; list-style: none; margin: 0; padding: 0;">
+	<a href="../home/main">메인으로 이동</a>
+
+	<ul>
 		<%
 		for (Map<String, Object> articleRow : articleRows) {
 		%>
-		<li>id-<%=articleRow.get("id")%>번, 작성날짜-<%=articleRow.get("regDate")%>,
-			제목-<%=articleRow.get("title")%>, 내용-<%=articleRow.get("body")%></li>
+		<li><%=articleRow.get("id")%>번,<%=articleRow.get("regDate")%>, <a
+			href="detail?id=<%=articleRow.get("id")%>"><%=articleRow.get("title")%></a>,<%=articleRow.get("body")%></li>
 		<%
 		}
 		%>
+
 	</ul>
+
+
 </body>
 </html>
