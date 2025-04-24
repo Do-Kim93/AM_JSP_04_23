@@ -12,12 +12,12 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-@WebServlet("/article/list")
-public class ArticleListServlet extends HttpServlet {
+@WebServlet("/article/detail")
+public class ArticleDetailServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+       
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
 		response.setContentType("text/html;charset=UTF-8");
 
 		try {
@@ -39,16 +39,20 @@ public class ArticleListServlet extends HttpServlet {
 			response.getWriter().append("연결 성공!<br>");
 
 			DBUtil dbUtill = new DBUtil(request, response);
+			
+			String Id = request.getParameter("id");
+			
+			int idNum = Integer.parseInt(Id);
 
-			String sql = "SELECT * FROM article";
+			String sql = "SELECT * FROM article where id ="+idNum;
 
-			List<Map<String, Object>> articleRows = DBUtil.selectRows(conn, sql);
+			Map<String, Object> articleRow = DBUtil.selectRow(conn, sql);
 
-			request.setAttribute("articleRows", articleRows);
+			request.setAttribute("articleRow", articleRow);
 
 //			response.getWriter().append(articleRows.toString());
 
-			request.getRequestDispatcher("/jsp/article/list.jsp").forward(request, response);
+			request.getRequestDispatcher("/jsp/article/detail.jsp").forward(request, response);
 		} catch (SQLException e) {
 			System.out.println("에러 1 : " + e);
 		} finally {
