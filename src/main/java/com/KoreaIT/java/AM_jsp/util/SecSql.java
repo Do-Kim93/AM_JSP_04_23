@@ -25,7 +25,7 @@ public class SecSql {
         return getFormat().startsWith("INSERT");
     }
 
-    public SecSql append(Object... args) {// 가변인자로 처리한 이유는 쿼리때문에 여러가지 경우수가 생기기때문
+    public SecSql append(Object... args) {
         if (args.length > 0) {
             String sqlBit = (String) args[0];
             sqlBuilder.append(sqlBit + " ");
