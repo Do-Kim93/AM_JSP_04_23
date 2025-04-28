@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 
 import com.KoreaIT.java.AM_jsp.util.DBUtil;
 import com.KoreaIT.java.AM_jsp.util.SecSql;
@@ -17,64 +19,71 @@ import jakarta.servlet.http.HttpServletResponse;
 @WebServlet("/member/doJoin")
 public class MemberDoJoinServlet extends HttpServlet {
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		response.setContentType("text/html;charset=UTF-8");
 
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return;
-        }
+		// DB 연결
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+		} catch (ClassNotFoundException e) {
+			System.out.println("클래스 x");
+			e.printStackTrace();
 
-        String url = "jdbc:mysql://127.0.0.1:3306/AM_JSP_25_04?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul";
-        String user = "root";
-        String password = "";
+		}
 
-        Connection conn = null;
+		String url = "jdbc:mysql://127.0.0.1:3306/AM_JSP_25_04?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul";
+		String user = "root";
+		String password = "";
 
-        try {
-            conn = DriverManager.getConnection(url, user, password);
+		Connection conn = null;
 
-            String loginId = request.getParameter("loginId");
-            String loginPw = request.getParameter("loginPw");
-            String name = request.getParameter("name");
+		try {
+			conn = DriverManager.getConnection(url, user, password);
 
-            // 비어있으면 실패처리 가능 (추가 가능)
-            if (loginId == null || loginPw == null || name == null || 
-                loginId.trim().isEmpty() || loginPw.trim().isEmpty() || name.trim().isEmpty()) {
-                response.getWriter().append("<script>alert('모든 값을 입력해주세요.'); history.back();</script>");
-                return;
-            }
+			String loginId = request.getParameter("loginId");
+			String loginPw = request.getParameter("loginPw");
+			String name = request.getParameter("name");
 
-            SecSql sql = SecSql.from("INSERT INTO member");
-            sql.append("SET regDate = NOW(),");
-            sql.append("loginId = ?,", loginId);
-            sql.append("loginPw = ?,", loginPw);
-            sql.append("name = ?", name);
+			SecSql sql = SecSql.from("SELECT COUNT(*) AS cnt FROM `member`");
+			sql.append("WHERE loginId = ?;", loginId);
 
-            int id = DBUtil.insert(conn, sql);
+			boolean isJoinableLoginId = DBUtil.selectRowIntValue(conn, sql) == 0;
 
-            response.getWriter()
-                    .append(String.format("<script>alert('회원가입 완료! [%d번 회원]'); location.replace('../home/main');</script>", id));
+			if (isJoinableLoginId == false) {
+				response.getWriter().append(String
+						.format("<script>alert('%s는 이미 사용중'); location.replace('../member/join');</script>", loginId));
+				return;
+			}
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-            response.getWriter().append("<script>alert('회원가입 실패!'); history.back();</script>");
-        } finally {
-            try {
-                if (conn != null && !conn.isClosed()) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+			sql = SecSql.from("INSERT INTO `member`");
+			sql.append("SET regDate = NOW(),");
+			sql.append("loginId = ?,", loginId);
+			sql.append("loginPw = ?,", loginPw);
+			sql.append("`name` = ?;", name);
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.getWriter().append("<script>alert('잘못된 접근입니다.'); history.back();</script>");
-    }
+			int id = DBUtil.insert(conn, sql);
+
+			response.getWriter().append(
+					String.format("<script>alert('%d번 회원이 가입됨'); location.replace('../article/list');</script>", id));
+
+		} catch (SQLException e) {
+			System.out.println("에러 1 : " + e);
+		} finally {
+			try {
+				if (conn != null && !conn.isClosed()) {
+					conn.close();
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		doGet(request, response);
+	}
+
 }
