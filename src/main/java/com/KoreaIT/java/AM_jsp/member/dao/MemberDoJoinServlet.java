@@ -1,4 +1,4 @@
-package com.KoreaIT.java.AM_jsp.servlet;
+package com.KoreaIT.java.AM_jsp.member.dao;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -16,8 +16,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet("/article/detail")
-public class ArticleDetailServlet extends HttpServlet {
+@WebServlet("/member/doJoin")
+public class MemberDoJoinServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -40,20 +40,32 @@ public class ArticleDetailServlet extends HttpServlet {
 
 		try {
 			conn = DriverManager.getConnection(url, user, password);
-			response.getWriter().append("연결 성공!");
 
-			int id = Integer.parseInt(request.getParameter("id"));
+			String loginId = request.getParameter("loginId");
+			String loginPw = request.getParameter("loginPw");
+			String name = request.getParameter("name");
 
-			SecSql sql = SecSql.from("SELECT *");
-			sql.append("FROM article inner join");
-			sql.append("member on article.mid = member.id");
-			sql.append("WHERE article.id = ?;", id);
+			SecSql sql = SecSql.from("SELECT COUNT(*) AS cnt FROM `member`");
+			sql.append("WHERE loginId = ?;", loginId);
 
-			Map<String, Object> articleRow = DBUtil.selectRow(conn, sql);
+			boolean isJoinableLoginId = DBUtil.selectRowIntValue(conn, sql) == 0;
 
-			request.setAttribute("articleRow", articleRow);
+			if (isJoinableLoginId == false) {
+				response.getWriter().append(String
+						.format("<script>alert('%s는 이미 사용중'); location.replace('../member/join');</script>", loginId));
+				return;
+			}
 
-			request.getRequestDispatcher("/jsp/article/detail.jsp").forward(request, response);
+			sql = SecSql.from("INSERT INTO `member`");
+			sql.append("SET regDate = NOW(),");
+			sql.append("loginId = ?,", loginId);
+			sql.append("loginPw = ?,", loginPw);
+			sql.append("`name` = ?;", name);
+
+			int id = DBUtil.insert(conn, sql);
+
+			response.getWriter().append(
+					String.format("<script>alert('%d번 회원이 가입됨'); location.replace('../article/list');</script>", id));
 
 		} catch (SQLException e) {
 			System.out.println("에러 1 : " + e);
@@ -67,6 +79,11 @@ public class ArticleDetailServlet extends HttpServlet {
 			}
 		}
 
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		doGet(request, response);
 	}
 
 }

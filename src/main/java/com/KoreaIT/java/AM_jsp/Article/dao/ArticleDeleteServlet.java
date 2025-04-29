@@ -1,4 +1,4 @@
-package com.KoreaIT.java.AM_jsp.servlet;
+package com.KoreaIT.java.AM_jsp.Article.dao;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -10,18 +10,28 @@ import java.util.Map;
 import com.KoreaIT.java.AM_jsp.util.DBUtil;
 import com.KoreaIT.java.AM_jsp.util.SecSql;
 
+import jakarta.security.auth.message.callback.PrivateKeyCallback.Request;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
-@WebServlet("/member/doJoin")
-public class MemberDoJoinServlet extends HttpServlet {
+@WebServlet("/article/doDelete")
+public class ArticleDeleteServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		HttpSession session = request.getSession();
 		response.setContentType("text/html;charset=UTF-8");
+		
+
+		if (session.getAttribute("loginedMemberId") == null) {
+			response.getWriter()
+					.append(String.format("<script>alert('로그인 하고와'); location.replace('../member/login');</script>"));
+			return;
+		}
 
 		// DB 연결
 		try {
@@ -40,32 +50,24 @@ public class MemberDoJoinServlet extends HttpServlet {
 
 		try {
 			conn = DriverManager.getConnection(url, user, password);
+			response.getWriter().append("연결 성공!");
 
-			String loginId = request.getParameter("loginId");
-			String loginPw = request.getParameter("loginPw");
-			String name = request.getParameter("name");
+			int id = Integer.parseInt(request.getParameter("id"));
+			int mid = Integer.parseInt(request.getParameter("mid"));
+			int nowid = (int) session.getAttribute("loginedMemberId");
+			if(mid == nowid) {
+				SecSql sql = SecSql.from("DELETE");
+				sql.append("FROM article");
+				sql.append("WHERE id = ?;", id);
 
-			SecSql sql = SecSql.from("SELECT COUNT(*) AS cnt FROM `member`");
-			sql.append("WHERE loginId = ?;", loginId);
+				DBUtil.delete(conn, sql);
 
-			boolean isJoinableLoginId = DBUtil.selectRowIntValue(conn, sql) == 0;
+				response.getWriter()
+						.append(String.format("<script>alert('%d번 글이 삭제됨'); location.replace('list');</script>", id));
+			}else{response.getWriter()
+			.append(String.format("<script>alert('니가 쓴거아니야'); location.replace('list');</script>"));}
 
-			if (isJoinableLoginId == false) {
-				response.getWriter().append(String
-						.format("<script>alert('%s는 이미 사용중'); location.replace('../member/join');</script>", loginId));
-				return;
-			}
-
-			sql = SecSql.from("INSERT INTO `member`");
-			sql.append("SET regDate = NOW(),");
-			sql.append("loginId = ?,", loginId);
-			sql.append("loginPw = ?,", loginPw);
-			sql.append("`name` = ?;", name);
-
-			int id = DBUtil.insert(conn, sql);
-
-			response.getWriter().append(
-					String.format("<script>alert('%d번 회원이 가입됨'); location.replace('../article/list');</script>", id));
+			
 
 		} catch (SQLException e) {
 			System.out.println("에러 1 : " + e);
@@ -79,11 +81,6 @@ public class MemberDoJoinServlet extends HttpServlet {
 			}
 		}
 
-	}
-
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		doGet(request, response);
 	}
 
 }

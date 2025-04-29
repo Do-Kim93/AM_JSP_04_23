@@ -1,4 +1,4 @@
-package com.KoreaIT.java.AM_jsp.servlet;
+package com.KoreaIT.java.AM_jsp.Article.dao;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -15,10 +15,9 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
-@WebServlet("/member/doLogin")
-public class MemberDoLoginServlet extends HttpServlet {
+@WebServlet("/article/doModify")
+public class ArticleDoModifyServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -42,36 +41,21 @@ public class MemberDoLoginServlet extends HttpServlet {
 		try {
 			conn = DriverManager.getConnection(url, user, password);
 
-			String loginId = request.getParameter("loginId");
-			String loginPw = request.getParameter("loginPw");
+			int id = Integer.parseInt(request.getParameter("id"));
 
-			SecSql sql = SecSql.from("SELECT *");
-			sql.append("FROM `member`");
-			sql.append("WHERE loginId = ?;", loginId);
+			String title = request.getParameter("title");
+			String body = request.getParameter("body");
 
-			Map<String, Object> memberRow = DBUtil.selectRow(conn, sql);
+			SecSql sql = SecSql.from("UPDATE article");
+			sql.append("SET");
+			sql.append("title = ?,", title);
+			sql.append("`body` = ?", body);
+			sql.append("WHERE id = ?;", id);
 
-			System.out.println(memberRow);
+			DBUtil.update(conn, sql);
 
-			if (memberRow.isEmpty()) {
-				response.getWriter().append(String.format(
-						"<script>alert('%s는 없는 아이디야'); location.replace('../member/login');</script>", loginId));
-				return;
-			}
-
-			if (memberRow.get("loginPw").equals(loginPw) == false) {
-				response.getWriter().append(String
-						.format("<script>alert('비밀번호 불일치'); location.replace('../member/login');</script>", loginId));
-				return;
-			}
-			
-			HttpSession session = request.getSession();
-			session.setAttribute("loginedMember", memberRow);
-			session.setAttribute("loginedMemberId", memberRow.get("id"));
-			session.setAttribute("loginedMemberLoginId", memberRow.get("loginId"));
-
-			response.getWriter().append(String.format(
-					"<script>alert('%s님 로그인됨'); location.replace('../home/main');</script>", memberRow.get("name")));
+			response.getWriter().append(
+					String.format("<script>alert('%d번 글이 수정됨'); location.replace('detail?id=%d');</script>", id, id));
 
 		} catch (SQLException e) {
 			System.out.println("에러 1 : " + e);
