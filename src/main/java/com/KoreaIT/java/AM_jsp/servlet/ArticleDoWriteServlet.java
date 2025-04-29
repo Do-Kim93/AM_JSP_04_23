@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
 
 import com.KoreaIT.java.AM_jsp.util.DBUtil;
 import com.KoreaIT.java.AM_jsp.util.SecSql;
@@ -23,7 +21,6 @@ public class ArticleDoWriteServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		response.setContentType("text/html;charset=UTF-8");
-		HttpSession session = request.getSession();
 
 		// DB 연결
 		try {
@@ -43,16 +40,18 @@ public class ArticleDoWriteServlet extends HttpServlet {
 		try {
 			conn = DriverManager.getConnection(url, user, password);
 
+			HttpSession session = request.getSession();
+
 			String title = request.getParameter("title");
 			String body = request.getParameter("body");
-			int mid = (int) session.getAttribute("loginedMemberId");
+			int loginedMemberId = (int) session.getAttribute("loginedMemberId");
 
 			SecSql sql = SecSql.from("INSERT INTO article");
 			sql.append("SET regDate = NOW(),");
+			sql.append("mid = ?,", loginedMemberId);
 			sql.append("title = ?,", title);
-			sql.append("`body` = ?,", body);
-			sql.append("`mid` = ?;", mid);
-			
+			sql.append("`body` = ?;", body);
+
 			int id = DBUtil.insert(conn, sql);
 
 			response.getWriter()
@@ -71,9 +70,10 @@ public class ArticleDoWriteServlet extends HttpServlet {
 		}
 
 	}
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		doGet(request, response);
 	}
-
 
 }

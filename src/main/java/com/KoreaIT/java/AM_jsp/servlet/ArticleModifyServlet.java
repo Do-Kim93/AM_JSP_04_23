@@ -5,6 +5,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -21,6 +23,13 @@ public class ArticleModifyServlet extends HttpServlet {
 			throws ServletException, IOException {
 
 		response.setContentType("text/html;charset=UTF-8");
+		HttpSession session = request.getSession();
+
+		if (session.getAttribute("loginedMemberId") == null) {
+			response.getWriter()
+					.append(String.format("<script>alert('로그인 하고와'); location.replace('../member/login');</script>"));
+			return;
+		}
 
 		// DB 연결
 		try {
@@ -41,20 +50,27 @@ public class ArticleModifyServlet extends HttpServlet {
 			conn = DriverManager.getConnection(url, user, password);
 
 			int id = Integer.parseInt(request.getParameter("id"));
+			int mid = Integer.parseInt(request.getParameter("mid"));
+			int nowid = (int) session.getAttribute("loginedMemberId");
+			if(mid == nowid) {
+				SecSql sql = SecSql.from("SELECT *");
+				sql.append("FROM article inner join");
+				sql.append("member on article.mid = member.id");
+				sql.append("WHERE article.id = ?;", id);
 
-			SecSql sql = SecSql.from("SELECT *");
-			sql.append("FROM article");
-			sql.append("WHERE id = ?;", id);
+				Map<String, Object> articleRow = DBUtil.selectRow(conn, sql);
 
-			Map<String, Object> articleRow = DBUtil.selectRow(conn, sql);
+				request.setAttribute("articleRow", articleRow);
+				
+				if(articleRow == null) {
+					// todo
+				}
 
-			request.setAttribute("articleRow", articleRow);
+				request.getRequestDispatcher("/jsp/article/modify.jsp").forward(request, response);
+			}else{response.getWriter()
+			.append(String.format("<script>alert('니가 쓴거아니야'); location.replace('list');</script>"));}
+
 			
-			if(articleRow == null) {
-				// todo
-			}
-
-			request.getRequestDispatcher("/jsp/article/modify.jsp").forward(request, response);
 
 		} catch (SQLException e) {
 			System.out.println("에러 1 : " + e);

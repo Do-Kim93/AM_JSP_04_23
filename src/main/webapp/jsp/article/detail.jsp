@@ -24,14 +24,14 @@ Map<String, Object> articleRow = (Map<String, Object>) request.getAttribute("art
 		날짜 :
 		<%=articleRow.get("regDate")%></div>
 	<div>
+		작성자 :
+		<%=articleRow.get("loginId")%></div>
+	<div>
 		제목 :
 		<%=articleRow.get("title")%></div>
 	<div>
 		내용 :
 		<%=articleRow.get("body")%></div>
-	<div>
-		작성자 :
-		<%=articleRow.get("loginId")%></div>
 
 	<div>
 		<a style="color: green;" href="list">리스트로 돌아가기</a>
