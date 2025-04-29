@@ -5,7 +5,8 @@
 	pageEncoding="UTF-8"%>
 <%
 List<Map<String, Object>> articleRows = (List<Map<String, Object>>) request.getAttribute("articleRows");
-
+Map<String, Object> loginedMember = (Map<String, Object>) request.getAttribute("loginedMember");
+boolean isLogined = (boolean) session.getAttribute("isLogined");
 int cPage = (int) request.getAttribute("page");
 int totalCnt = (int) request.getAttribute("totalCnt");
 int totalPage = (int) request.getAttribute("totalPage");
@@ -42,8 +43,16 @@ table>thead>tr>th, table>tbody>tr>td {
 				<th>날짜</th>
 				<th>제목</th>
 				<th>내용</th>
+				<th>작성자</th>
+					<%
+				if (isLogined) {
+				%>
 				<th>수정</th>
 				<th>삭제</th>
+				<%
+				}
+				%>
+				
 			</tr>
 		</thead>
 		<tbody>
@@ -55,10 +64,23 @@ table>thead>tr>th, table>tbody>tr>td {
 				<td><%=articleRow.get("regDate")%></td>
 				<td><a href="detail?id=<%=articleRow.get("id")%>"><%=articleRow.get("title")%></a></td>
 				<td><%=articleRow.get("body")%></td>
+				<td><%=articleRow.get("loginId")%></td>
+				<%
+				if (!isLogined) {
+				%>
+				<%
+				}
+				%>
+				<%
+				if (isLogined) {
+				%>
 				<td><a href="modify?id=<%=articleRow.get("id")%>">수정</a></td>
 				<td><a
 						onclick="if ( confirm('정말 삭제하시겠습니까?') == false ) { return false; }"
-						href="doDelete?id=<%=articleRow.get("id")%>">del</a></td>
+						href="doDelete?id=<%=articleRow.get("id")%>&mid=<%=articleRow.get("mid")%>">del</a></td>
+				<%
+				}
+				%>
 			</tr>
 			<%
 			}

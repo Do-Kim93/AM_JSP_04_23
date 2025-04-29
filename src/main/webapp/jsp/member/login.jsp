@@ -8,22 +8,16 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>회원가입</title>
+<title>로그인</title>
 
 </head>
 <body>
-	<h2>회원가입</h2>
+	<h2>로그인</h2>
 
 	<a href="../home/main">메인으로 이동</a>
 
 	<script type="text/javascript">
-		function JoinForm__submit(form) {
-			console.log('form.loginId.value : ' + form.loginId.value);
-			console.log('form.loginId.value.trim() : '
-					+ form.loginId.value.trim());
-			console.log('form.loginPw.value : ' + form.loginPw.value);
-			console.log('form.loginPwConfirm.value : '
-					+ form.loginPwConfirm.value);
+		function LoginForm__submit(form) {
 		
 			let loginId = form.loginId.value.trim();
 			let loginPw = form.loginPw.value.trim();
@@ -40,14 +34,13 @@
 				return;
 			}
 
-
 			form.submit();
 
 		}
 	</script>
 
 
-	<form onsubmit="JoinForm__submit(this); return false;" action="doLogin"
+	<form onsubmit="LoginForm__submit(this); return false;" action="doLogin"
 		method="POST">
 		<div>
 			아이디 : <input autocomplete="off" type="text" placeholder="아이디 입력"

@@ -22,7 +22,6 @@ public class MemberDoLoginServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		HttpSession session = request.getSession();
 		response.setContentType("text/html;charset=UTF-8");
 
 		// DB 연결
@@ -46,28 +45,33 @@ public class MemberDoLoginServlet extends HttpServlet {
 			String loginId = request.getParameter("loginId");
 			String loginPw = request.getParameter("loginPw");
 
-			SecSql sql = SecSql.from("SELECT COUNT(*) AS cnt FROM `member`");
-			sql.append("WHERE loginId = ? and loginPw = ?;", loginId, loginPw);
+			SecSql sql = SecSql.from("SELECT *");
+			sql.append("FROM `member`");
+			sql.append("WHERE loginId = ?;", loginId);
 
-			boolean isJoinableLoginId = DBUtil.selectRowIntValue(conn, sql) == 0;
+			Map<String, Object> memberRow = DBUtil.selectRow(conn, sql);
 
-			if (isJoinableLoginId) {
-				response.getWriter().append(String
-						.format("<script>alert('잘못된 정보를 입력하셨습니다'); location.replace('../member/login');</script>"));
+			System.out.println(memberRow);
+
+			if (memberRow.isEmpty()) {
+				response.getWriter().append(String.format(
+						"<script>alert('%s는 없는 아이디야'); location.replace('../member/login');</script>", loginId));
 				return;
 			}
 
-
-			response.getWriter().append(
-					String.format("<script>alert('%s 회원님 안녕하세요'); location.replace('../article/list');</script>", loginId));
-			sql = SecSql.from("SELECT * FROM `member`");
-			sql.append("WHERE loginId = ? and loginPw = ?;", loginId, loginPw);
+			if (memberRow.get("loginPw").equals(loginPw) == false) {
+				response.getWriter().append(String
+						.format("<script>alert('비밀번호 불일치'); location.replace('../member/login');</script>", loginId));
+				return;
+			}
 			
-			Map<String, Object> memberRow = DBUtil.selectRow(conn, sql);
-			String logId = (String) memberRow.get("id");
+			HttpSession session = request.getSession();
+			session.setAttribute("loginedMember", memberRow);
+			session.setAttribute("loginedMemberId", memberRow.get("id"));
+			session.setAttribute("loginedMemberLoginId", memberRow.get("loginId"));
 
-			session.setAttribute("memberRow", memberRow);
-			session.setAttribute("logId", logId);
+			response.getWriter().append(String.format(
+					"<script>alert('%s님 로그인됨'); location.replace('../home/main');</script>", memberRow.get("name")));
 
 		} catch (SQLException e) {
 			System.out.println("에러 1 : " + e);
